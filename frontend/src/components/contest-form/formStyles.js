@@ -1,0 +1,4 @@
+export const inputClass = (hasError) => `input input-bordered bg-gray-800 border-gray-700 w-full focus:ring-2 focus:ring-primary focus:border-transparent ${hasError ? 'border-error' : ''}`;
+export const textareaClass = (hasError) => `textarea textarea-bordered bg-gray-800 border-gray-700 w-full h-24 focus:ring-2 focus:ring-primary focus:border-transparent ${hasError ? 'border-error' : ''}`;
+export const selectClass = (hasError) => `select select-bordered bg-gray-800 border-gray-700 w-full focus:ring-2 focus:ring-primary focus:border-transparent ${hasError ? 'border-error' : ''}`;
+export const errorTextClass = "label-text-alt text-error mt-1";

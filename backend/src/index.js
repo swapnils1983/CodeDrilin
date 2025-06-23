@@ -1,0 +1,69 @@
+const express = require('express');
+const app = express();
+require('dotenv').config();
+const PORT = process.env.PORT || 5000;
+const main = require("./config/db");
+const cookieParser = require('cookie-parser');
+const authRouter = require('./routes/userAuth');
+const problemRouter = require('./routes/problemCreator');
+const submitRouter = require('./routes/submit');
+const contestRouter = require('./routes/contest');
+const aiChatRouter = require('./routes/aiChat')
+const cors = require('cors');
+const http = require('http');
+const { initSocket } = require('./utils/socketUtils');
+
+const server = http.createServer(app);
+
+
+const io = initSocket(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"]
+    }
+});
+
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(cookieParser());
+
+
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    socket.on('join_contest_room', (contestId) => {
+        const roomName = `contest_${contestId}`;
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} joined room ${roomName}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+
+// --- API ROUTES ---
+
+app.use('/user', authRouter);
+app.use('/problem', problemRouter);
+app.use('/submission', submitRouter);
+app.use('/contest', contestRouter);
+app.use('/ai', aiChatRouter)
+
+main()
+    .then(() => {
+        // *** CORRECTED PART ***
+        // We start the HTTP server here, which includes both Express and Socket.IO.
+        // We have removed the incorrect app.listen().
+        server.listen(PORT, () => {
+            console.log(`Server with Socket.IO listening at PORT: ${PORT}`);
+        });
+    })
+    .catch(err => console.log("Error connecting to DB: " + err));
