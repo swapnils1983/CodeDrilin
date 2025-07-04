@@ -51,6 +51,17 @@ const HomePage = () => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     };
 
+const handleDelete = async (problemId) => {
+    if (!window.confirm("Are you sure you want to delete this problem?")) return;
+    try {
+        await axiosInstance.delete(`/problem/delete/${problemId}`);
+        setProblems(prev => prev.filter(p => p._id !== problemId));
+    } catch (error) {
+        alert("Failed to delete problem.");
+        console.error(error);
+    }
+};
+
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100">
             {/* Navbar */}
@@ -110,7 +121,7 @@ const HomePage = () => {
 
                 {/* Problem Table */}
                 <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700 shadow">
-                    <table className="table table-zebra text-sm">
+                    <table className="table  bg-gray-800 table-zebra text-sm">
                         <thead className="text-gray-300 bg-gray-700">
                             <tr>
                                 <th>#</th>
@@ -118,6 +129,7 @@ const HomePage = () => {
                                 <th>Difficulty</th>
                                 <th>Tags</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,6 +162,14 @@ const HomePage = () => {
                                         ) : (
                                             <span className="text-gray-500">Unsolved</span>
                                         )}
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                            onClick={() => handleDelete(problem._id)}
+                                        >
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
