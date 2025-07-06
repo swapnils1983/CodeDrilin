@@ -5,16 +5,11 @@ import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router';
 import Navbar from '../components/Navbar';
 
-const difficulties = ['All', 'easy', 'medium', 'hard'];
-const allTags = ['Array', 'Hash Table', 'Sliding Window', 'Binary Search', 'Divide and Conquer'];
-
 const HomePage = () => {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const [problems, setProblems] = useState([]);
-    const [selectedDifficulty, setSelectedDifficulty] = useState('All');
-    const [selectedTags, setSelectedTags] = useState([]);
-    const [showSolved, setShowSolved] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     const solvedProblems = useMemo(() => new Set(user?.problemSolved || []), [user?.problemSolved]);
@@ -32,26 +27,17 @@ const HomePage = () => {
     }, []);
 
     const filteredProblems = useMemo(() => {
-        return problems.filter(problem => {
-            const matchDifficulty = selectedDifficulty === 'All' || problem.difficulty === selectedDifficulty;
-            const matchTags = selectedTags.length === 0 || selectedTags.every(tag => problem.tags.includes(tag));
-            const matchSolved = !showSolved || solvedProblems.has(problem._id);
-            return matchDifficulty && matchTags && matchSolved;
-        });
-    }, [problems, selectedDifficulty, selectedTags, showSolved, solvedProblems]);
-
-    const toggleTag = (tag) => {
-        setSelectedTags(prev =>
-            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        return problems.filter(problem =>
+            problem.title.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    };
+    }, [problems, searchQuery]);
 
     const capitalizeFirstLetter = (str) => {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1);
     };
 
-const handleDelete = async (problemId) => {
+    const handleDelete = async (problemId) => {
     if (!window.confirm("Are you sure you want to delete this problem?")) return;
     try {
         await axiosInstance.delete(`/problem/delete/${problemId}`);
@@ -62,66 +48,35 @@ const handleDelete = async (problemId) => {
     }
 };
 
+    
+
     return (
+        <>
+        <style>
+            {`
+                .table-zebra tbody tr:nth-child(even) {
+                    background-color: #2d3748;
+                }
+            `}
+        </style>
         <div className="min-h-screen bg-gray-900 text-gray-100">
             {/* Navbar */}
 
-
             {/* Rest of the component remains the same */}
-            {/* Filters */}
-            <div className="p-6 space-y-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    {/* Difficulty Filter */}
-                    <div>
-                        <label className="label text-gray-300 mb-1">Difficulty</label>
-                        <select
-                            className="select select-bordered bg-gray-800 border-gray-700 text-white"
-                            value={selectedDifficulty}
-                            onChange={e => setSelectedDifficulty(e.target.value)}
-                        >
-                            {difficulties.map(diff => (
-                                <option key={diff} value={diff}>{diff}</option>
-                            ))}
-                        </select>
-                    </div>
+            {/* Search Bar */}
+            <div className="p-6">
+                <input
+                    type="text"
+                    placeholder="Search by title..."
+                    className="input input-bordered w-full bg-gray-800 border-gray-700 text-white"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                />
+            </div>
 
-                    {/* Tag Filters */}
-                    <div>
-                        <label className="label text-gray-300 mb-1">Tags</label>
-                        <div className="flex flex-wrap gap-2">
-                            {allTags.map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => toggleTag(tag)}
-                                    className={`badge cursor-pointer px-3 py-2 ${selectedTags.includes(tag)
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-700 text-gray-300'
-                                        }`}
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Solved Problems Filter */}
-                    <div className="ml-4">
-                        <label className="label text-gray-300 mb-1">Status</label>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="toggle toggle-success"
-                                checked={showSolved}
-                                onChange={() => setShowSolved(!showSolved)}
-                            />
-                            <span className="text-gray-300">Show solved only</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Problem Table */}
+            {/* Problem Table */}
                 <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700 shadow">
-                    <table className="table  bg-gray-800 table-zebra text-sm">
+                    <table className="table bg-gray-800 table-zebra text-sm">
                         <thead className="text-gray-300 bg-gray-700">
                             <tr>
                                 <th>#</th>
@@ -175,16 +130,16 @@ const handleDelete = async (problemId) => {
                             ))}
                             {filteredProblems.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="text-center text-gray-500 py-4">
-                                        No problems match the selected filters.
+                                    <td colSpan="6" className="text-center text-gray-500 py-4">
+                                        No problems found.
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
-            </div>
         </div>
+        </>
     );
 };
 
