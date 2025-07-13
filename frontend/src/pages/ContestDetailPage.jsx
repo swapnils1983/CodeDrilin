@@ -32,7 +32,6 @@ const ContestDetailPage = () => {
             try {
                 setLoading(true);
 
-                // Fetch contest details
                 const [contestResponse, registrationResponse] = await Promise.all([
                     axiosInstance.get(`/contest/${contestId}`),
                     axiosInstance.get(`/contest/check/is-registered/${contestId}`)
@@ -40,7 +39,6 @@ const ContestDetailPage = () => {
 
                 setContest(contestResponse.data);
 
-                // Check registration status from both sources
                 const registeredFromParticipants = user && contestResponse.data.participants.includes(user._id);
                 const registeredFromCheck = registrationResponse.data?.status;
 
@@ -110,7 +108,6 @@ const ContestDetailPage = () => {
         );
     }
 
-    // Components for Tab Content
     const OverviewTab = () => (
         <div className="space-y-6">
             <div className="card bg-gray-800 border border-gray-700">
@@ -201,45 +198,56 @@ const ContestDetailPage = () => {
         );
     };
 
-    const LeaderboardTab = () => (
-        <div className="card bg-gray-800 border border-gray-700">
-            <div className="card-body">
-                {contestStatus === 'upcoming' ? (
-                    <p className="text-center text-gray-400 py-8">The leaderboard will be available after the contest starts.</p>
-                ) : contest.cachedLeaderboard?.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead className="text-gray-300">
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>User</th>
-                                    <th>Problems Solved</th>
-                                    <th>Total Time (min)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {contest.cachedLeaderboard.map((entry, index) => (
-                                    <tr key={entry.userId || index} className="hover">
-                                        <th className="text-lg">{entry.rank}</th>
-                                        <td>{entry.username}</td>
-                                        <td>{entry.problemsSolved}</td>
-                                        <td>{entry.totalTime}</td>
+    const LeaderboardTab = () => {
+        const userIdToName = {};
+        contest.participants?.forEach(participant => {
+            userIdToName[participant._id] = participant.firstName || "Unknown";
+        });
+
+        return (
+            <div className="card bg-gray-800 border border-gray-700">
+                <div className="card-body">
+                    {contestStatus === 'upcoming' ? (
+                        <p className="text-center text-gray-400 py-8">
+                            The leaderboard will be available after the contest starts.
+                        </p>
+                    ) : contest.cachedLeaderboard?.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="table table-zebra">
+                                <thead className="text-gray-300">
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>User</th>
+                                        <th>Problems Solved</th>
+                                        <th>Total Time (min)</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <p className="text-center text-gray-400 py-8">Leaderboard is empty or not yet calculated.</p>
-                )}
+                                </thead>
+                                <tbody>
+                                    {contest.cachedLeaderboard.map((entry, index) => (
+                                        <tr key={entry.userId || index} className="hover">
+                                            <th className="text-lg">{entry.rank ?? index + 1}</th>
+                                            <td>{userIdToName[entry.userId] || "Unknown"}</td>
+                                            <td>{entry.problemsSolved}</td>
+                                            <td>{entry.totalTime}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p className="text-center text-gray-400 py-8">
+                            Leaderboard is empty or not yet calculated.
+                        </p>
+                    )}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
+
 
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
             <div className="max-w-6xl mx-auto">
-                {/* Header Section */}
                 <div className="mb-8 p-6 bg-gray-800 rounded-lg border border-gray-700 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -265,7 +273,6 @@ const ContestDetailPage = () => {
                     )}
                 </div>
 
-                {/* Tabs Navigation */}
                 <div className="tabs tabs-boxed bg-gray-800 border border-gray-700 mb-6">
                     <button
                         className={`tab tab-lg ${activeTab === 'overview' ? 'tab-active' : ''}`}
@@ -287,7 +294,6 @@ const ContestDetailPage = () => {
                     </button>
                 </div>
 
-                {/* Tab Content */}
                 <div>
                     {activeTab === 'overview' && <OverviewTab />}
                     {activeTab === 'problems' && <ProblemsTab />}

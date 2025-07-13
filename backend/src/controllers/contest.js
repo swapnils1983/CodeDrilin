@@ -124,7 +124,6 @@ registerForContest = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 getLeaderboard = async (req, res) => {
     try {
         const contestId = req.params.contestId;
@@ -134,40 +133,37 @@ getLeaderboard = async (req, res) => {
             return res.status(404).json({ error: 'Contest not found' });
         }
 
-        // Get all submissions for this contest
-        const submissions = await Submission.find({ contest: contestId })
-            .populate('user', 'username')
-            .populate('problem', 'title');
+        const submissions = await Submission.find({ contestId })
+            .populate('userId', 'firstName lastName')
+            .populate('problemId', 'title');
 
-        // Process submissions to calculate scores
         const leaderboard = {};
 
         submissions.forEach(sub => {
-            if (!leaderboard[sub.user._id]) {
-                leaderboard[sub.user._id] = {
-                    username: sub.user.username,
-                    userId: sub.user._id,
+            if (!sub.userId) return;
+
+            if (!leaderboard[sub.userId._id]) {
+                leaderboard[sub.userId._id] = {
+                    username: `${sub.userId.firstName} ${sub.userId.lastName || ''}`.trim(),
+                    userId: sub.userId._id,
                     problemsSolved: 0,
                     totalTime: 0,
                     problems: {}
                 };
             }
 
-            // Only count the first accepted submission
-            if (sub.verdict === 'Accepted' && !leaderboard[sub.user._id].problems[sub.problem._id]) {
-                leaderboard[sub.user._id].problems[sub.problem._id] = true;
-                leaderboard[sub.user._id].problemsSolved += 1;
+            if (sub.status === 'accepted' && !leaderboard[sub.userId._id].problems[sub.problemId._id]) {
+                leaderboard[sub.userId._id].problems[sub.problemId._id] = true;
+                leaderboard[sub.userId._id].problemsSolved += 1;
 
-                // Calculate time penalty (in minutes)
                 const contestStart = new Date(contest.startTime).getTime();
-                const submissionTime = new Date(sub.submittedAt).getTime();
-                const timeInMinutes = Math.floor((submissionTime - contestStart) / (1000 * 60));
+                const submissionTime = new Date(sub.createdAt).getTime();
+                const timeInSeconds = Math.floor((submissionTime - contestStart) / 1000);
 
-                leaderboard[sub.user._id].totalTime += timeInMinutes;
+                leaderboard[sub.userId._id].totalTime += timeInSeconds;
             }
         });
 
-        // Convert to array and sort
         const leaderboardArray = Object.values(leaderboard);
         leaderboardArray.sort((a, b) => {
             if (b.problemsSolved !== a.problemsSolved) {
@@ -181,6 +177,8 @@ getLeaderboard = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 const isRegisterd = async (req, res) => {
     try {

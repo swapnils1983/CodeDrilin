@@ -49,7 +49,6 @@ io.on('connection', (socket) => {
 });
 
 
-// --- API ROUTES ---
 
 app.use('/user', authRouter);
 app.use('/problem', problemRouter);
@@ -59,9 +58,6 @@ app.use('/ai', aiChatRouter)
 
 main()
     .then(() => {
-        // *** CORRECTED PART ***
-        // We start the HTTP server here, which includes both Express and Socket.IO.
-        // We have removed the incorrect app.listen().
         server.listen(PORT, () => {
             console.log(`Server with Socket.IO listening at PORT: ${PORT}`);
         });

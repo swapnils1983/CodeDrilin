@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axiosInstance from '../utils/axiosInstance';
 
 // Zod Schemas
 const testCaseSchema = z.object({
@@ -169,15 +170,15 @@ const CreateProblemPage = () => {
     };
 
     const onSubmit = async (data) => {
-        const isValid = await trigger();
-
-        if (isValid) {
-            console.log("Problem Data Submitted:", JSON.stringify(data, null, 2));
-            alert("Problem created successfully! Check the console for the JSON output.");
+        try {
+            const res = await axiosInstance.post('/problem/create', data);
+            console.log(res.data)
+        } catch (error) {
+            console.log(error)
         }
     };
 
-    // Helper classes
+
     const inputClass = (hasError) => `input input-bordered bg-gray-700 border-gray-600 w-full focus:ring-2 focus:ring-green-400 focus:border-transparent ${hasError ? 'border-red-500' : ''}`;
     const textareaClass = (hasError) => `textarea textarea-bordered bg-gray-700 border-gray-600 w-full h-24 focus:ring-2 focus:ring-green-400 focus:border-transparent ${hasError ? 'border-red-500' : ''}`;
     const selectClass = (hasError) => `select select-bordered bg-gray-700 border-gray-600 w-full focus:ring-2 focus:ring-green-400 focus:border-transparent ${hasError ? 'border-red-500' : ''}`;

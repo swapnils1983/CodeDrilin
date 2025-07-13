@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router';
-import Navbar from '../components/Navbar';
+
 
 const ContestsPage = () => {
     const [contests, setContests] = useState([]);
@@ -11,9 +11,7 @@ const ContestsPage = () => {
     useEffect(() => {
         const fetchContests = async () => {
             try {
-                // Sorting on the backend is preferable, but we can sort here too.
                 const response = await axiosInstance.get('/contest');
-                // Sort by start time descending to show newest first in past contests
                 const sortedData = response.data.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
                 setContests(sortedData);
             } catch (error) {
@@ -35,7 +33,6 @@ const ContestsPage = () => {
         return 'past';
     };
 
-    // Memoize the separation of contests to avoid re-calculation on every render
     const { activeContests, pastContests } = useMemo(() => {
         const active = [];
         const past = [];
@@ -44,12 +41,11 @@ const ContestsPage = () => {
             const status = getContestStatus(contest);
             if (status === 'past') {
                 past.push(contest);
-            } else { // 'ongoing' or 'upcoming'
+            } else {
                 active.push(contest);
             }
         });
 
-        // Sort active contests: ongoing first, then upcoming chronologically
         active.sort((a, b) => {
             const statusA = getContestStatus(a);
             const statusB = getContestStatus(b);
@@ -81,13 +77,11 @@ const ContestsPage = () => {
         );
     };
 
-    // A reusable component for rendering a contest card
     const ContestCard = ({ contest }) => (
         <div className="card lg:card-side bg-gray-800 shadow-lg border border-gray-700 hover:border-green-400 transition-all duration-300 mb-4">
-            <Navbar />
+
             <div className="card-body p-6">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    {/* Left Side: Details */}
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <h2 className="card-title text-xl text-gray-100">{contest.title}</h2>
@@ -103,7 +97,6 @@ const ContestsPage = () => {
                             <span>Participants: <strong>{contest.participants?.length || 0}</strong></span>
                         </div>
                     </div>
-                    {/* Right Side: Action */}
                     <div className="card-actions items-center self-start sm:self-center">
                         <button
                             className="btn btn-primary btn-outline"
@@ -117,7 +110,6 @@ const ContestsPage = () => {
         </div>
     );
 
-    // A reusable component for rendering a section of contests
     const ContestSection = ({ title, contestsList }) => (
         <div className="mb-12">
             <h2 className="text-2xl font-semibold text-green-400 border-b-2 border-gray-700 pb-2 mb-6">

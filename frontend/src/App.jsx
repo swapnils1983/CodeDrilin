@@ -15,6 +15,7 @@ import ContestsPage from "./pages/ContestsPage"
 import ContestDetailPage from "./pages/ContestDetailPage"
 import UserRoute from "./routes/UserRoute"
 import ContestProblemPage from "./pages/ContestProblemPage"
+import ProblemdetailPage from "./pages/ProblemdetailPage"
 
 function App() {
 
@@ -45,8 +46,9 @@ function App() {
         <Route path="/contest/:contestId/problem/:problemId" element={<ContestProblemPage />} />
 
         <Route path="/" element={<UserRoute />} >
-          <Route path="/" element={isAuthenticated ? <HomePage></HomePage> : <Navigate to={'/login'} />} />
-          <Route path="/problem/:id" element={isAuthenticated ? <ProblemPage></ProblemPage> : <Navigate to={'/login'} />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/problems" element={<ProblemPage />} />
+          <Route path="/problem/:id" element={isAuthenticated ? <ProblemdetailPage></ProblemdetailPage> : <Navigate to={'/'} />} />
           <Route path="/contests" element={<ContestsPage />} />
           <Route path="/contest/:contestId" element={<ContestDetailPage />} />
         </Route>

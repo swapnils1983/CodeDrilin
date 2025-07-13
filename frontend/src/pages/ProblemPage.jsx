@@ -1,231 +1,160 @@
-import React, { useState, useEffect } from 'react';
-import Editor from '@monaco-editor/react';
-import { useParams } from 'react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../authSlice';
 import axiosInstance from '../utils/axiosInstance';
-import ProblemHeader from '../components/problem-description/ProblemHeader';
-import TabNavigation from '../components/problem-description/TabNavigation';
-import DescriptionTab from '../components/problem-description/DescriptionTab';
-import SolutionsTab from '../components/problem-description/SolutionsTab';
-import AiHelpTab from '../components/problem-description/AiHelpTab';
-import EditorControls from '../components/problem-description/EditorControls';
-import OutputPanel from '../components/problem-description/OutputPanel';
-import SubmissionsTab from '../components/problem-description/SubmissionsTab';
+import { useNavigate } from 'react-router';
+import Navbar from '../components/Navbar';
+
+const difficulties = ['All', 'easy', 'medium', 'hard'];
+const allTags = ['Array', 'Hash Table', 'Sliding Window', 'Binary Search', 'Divide and Conquer'];
 
 const ProblemPage = () => {
-    const [activeLeftTab, setActiveLeftTab] = useState('description');
-    const [selectedLanguage, setSelectedLanguage] = useState('c++');
-    const [code, setCode] = useState('');
-    const [output, setOutput] = useState({ type: '', message: '', details: [] });
-    const [activeOutputTab, setActiveOutputTab] = useState('testResults');
-    const [problemData, setProblemData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { user } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+    const [problems, setProblems] = useState([]);
+    const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [showSolved, setShowSolved] = useState(false);
+    const navigate = useNavigate();
 
-
-    const { id } = useParams();
+    const solvedProblems = useMemo(() => new Set(user?.problemSolved || []), [user?.problemSolved]);
 
     useEffect(() => {
-        const fetchProblemDetail = async () => {
+        const fetchProblems = async () => {
             try {
-                const res = await axiosInstance.get(`problem/problemById/${id}`);
-                setProblemData(res.data);
-                setLoading(false);
+                const response = await axiosInstance.get('/problem/getAllProblem');
+                setProblems(response.data);
             } catch (error) {
-                console.error("Error fetching problem:", error);
-                setLoading(false);
+                console.error("Failed to fetch problems:", error);
             }
         };
-        fetchProblemDetail();
-    }, [id]);
+        fetchProblems();
+    }, []);
 
-    useEffect(() => {
-        if (problemData) {
-            const initialCode = problemData.startCode.find(lang => lang.language === selectedLanguage)?.initialCode || '';
-            setCode(initialCode);
-        }
-    }, [selectedLanguage, problemData]);
+    const filteredProblems = useMemo(() => {
+        return problems.filter(problem => {
+            const matchDifficulty = selectedDifficulty === 'All' || problem.difficulty === selectedDifficulty;
+            const matchTags = selectedTags.length === 0 || selectedTags.every(tag => problem.tags.includes(tag));
+            const matchSolved = !showSolved || solvedProblems.has(problem._id);
+            return matchDifficulty && matchTags && matchSolved;
+        });
+    }, [problems, selectedDifficulty, selectedTags, showSolved, solvedProblems]);
 
-    const handleLanguageChange = (language) => {
-        setSelectedLanguage(language);
+    const toggleTag = (tag) => {
+        setSelectedTags(prev =>
+            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        );
     };
 
-    const handleResetCode = () => {
-        const initialCode = problemData.startCode.find(lang => lang.language === selectedLanguage)?.initialCode || '';
-        setCode(initialCode);
+    const capitalizeFirstLetter = (str) => {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1);
     };
-
-    const handleRunCode = async () => {
-        setOutput({ type: 'running', message: 'Running test cases...', details: [] });
-        setActiveOutputTab('testResults');
-
-        try {
-            const response = await axiosInstance.post(`submission/run/${id}`, {
-                language: selectedLanguage,
-                code: code
-            });
-
-            const formattedResults = response.data.map((result, index) => ({
-                id: result.token || `tc${index}`,
-                name: `Test Case ${index + 1}`,
-                input: result.stdin,
-                expectedOutput: result.expected_output,
-                actualOutput: result.stdout,
-                passed: result.status_id === 3,
-                runtime: `${result.time || 0} ms`,
-                memory: `${result.memory || 0} KB`,
-                status: result.status?.description || '',
-                explanation: problemData.visibleTestCases[index]?.explanation || ''
-            }));
-
-            const allPassed = formattedResults.every(r => r.passed);
-            setOutput({
-                type: allPassed ? 'success' : 'error',
-                message: allPassed ? 'All sample tests passed!' : 'Some sample tests failed.',
-                details: formattedResults
-            });
-        } catch (error) {
-            console.error("Error running code:", error);
-            setOutput({
-                type: 'error',
-                message: error.response?.data?.message || 'Failed to run code',
-                details: error.response?.data?.compile_output ?
-                    [{ name: 'Compilation Error', details: error.response.data.compile_output }] : []
-            });
-        }
-    };
-
-    const handleSubmitCode = async () => {
-        setOutput({ type: 'running', message: 'Submitting solution...', details: [] });
-        setActiveOutputTab('console');
-
-        try {
-            const response = await axiosInstance.post(`submission/submit/${id}`, {
-                language: selectedLanguage,
-                code: code
-            });
-
-            const data = response.data;
-            const testCasesPassed = data.testCasesPassed;
-            const totalTestCases = data.testCasesTotal;
-            const passedAll = testCasesPassed === totalTestCases;
-
-            setOutput({
-                type: passedAll ? 'success' : 'error',
-                message: passedAll ? 'Accepted' : 'Wrong Answer',
-                details: [
-                    {
-                        name: 'Overall Result',
-                        passed: passedAll,
-                        runtime: `${data.runtime || 0}ms`,
-                        memory: `${data.memory || 0}KB`,
-                        testCasesPassed,
-                        totalTestCases,
-                        status: data.status || 'Unknown'
-                    }
-                ]
-            });
-
-        } catch (error) {
-            console.error("Error submitting code:", error);
-            setOutput({
-                type: 'error',
-                message: error.response?.data?.message || 'Failed to submit code',
-                details: error.response?.data?.compile_output ?
-                    [{ name: 'Compilation Error', details: error.response.data.compile_output }] : []
-            });
-        }
-    };
-
-    const getLanguageForMonaco = (lang) => {
-        if (lang === 'c++') return 'cpp';
-        if (lang === 'python3') return 'python';
-        return lang;
-    };
-
-    if (loading) return <div className="min-h-screen bg-gray-900 text-gray-100 flex justify-center items-center">Loading...</div>;
-    if (!problemData) return <div className="min-h-screen bg-gray-900 text-gray-100 flex justify-center items-center">Problem not found</div>;
-
-    const leftTabs = ['description', 'submissions', 'solutions', 'ai help'];
 
     return (
-        <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-            <div className="flex flex-1 overflow-hidden">
-                {/* Left Pane */}
-                <div className="w-1/2 flex flex-col border-r border-gray-700 overflow-y-auto">
-                    <ProblemHeader
-                        title={problemData.title}
-                        difficulty={problemData.difficulty}
-                        isContestProblem={problemData.isContestProblem}
-                        tags={problemData.tags}
-                    />
+        <div className="min-h-screen bg-gray-900 text-gray-100">
 
-                    <TabNavigation
-                        tabs={leftTabs}
-                        activeTab={activeLeftTab}
-                        setActiveTab={setActiveLeftTab}
-                    />
 
-                    <div className="flex-1 p-4 overflow-y-auto prose prose-sm prose-invert max-w-none">
-                        {activeLeftTab === 'description' && (
-                            <DescriptionTab
-                                description={problemData.description}
-                                visibleTestCases={problemData.visibleTestCases}
+            <div className="p-6 space-y-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label className="label text-gray-300 mb-1">Difficulty</label>
+                        <select
+                            className="select select-bordered bg-gray-800 border-gray-700 text-white"
+                            value={selectedDifficulty}
+                            onChange={e => setSelectedDifficulty(e.target.value)}
+                        >
+                            {difficulties.map(diff => (
+                                <option key={diff} value={diff}>{diff}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="label text-gray-300 mb-1">Tags</label>
+                        <div className="flex flex-wrap gap-2">
+                            {allTags.map(tag => (
+                                <button
+                                    key={tag}
+                                    onClick={() => toggleTag(tag)}
+                                    className={`badge cursor-pointer px-3 py-2 ${selectedTags.includes(tag)
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-gray-700 text-gray-300'
+                                        }`}
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="ml-4">
+                        <label className="label text-gray-300 mb-1">Status</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                className="toggle toggle-success"
+                                checked={showSolved}
+                                onChange={() => setShowSolved(!showSolved)}
                             />
-                        )}
-
-                        {activeLeftTab === 'submissions' && (
-                            <SubmissionsTab id={problemData._id} />
-                        )}
-
-                        {activeLeftTab === 'solutions' && (
-                            <SolutionsTab
-                                referenceSolution={problemData.referenceSolution}
-                                selectedLanguage={selectedLanguage}
-                                setSelectedLanguage={setSelectedLanguage}
-                            />
-                        )}
-
-                        {activeLeftTab === 'ai help' && (
-                            <AiHelpTab
-                                problemData={problemData}
-                            />
-                        )}
+                            <span className="text-gray-300">Show solved only</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Pane - Code Editor and Output */}
-                <div className="w-1/2 flex flex-col">
-                    <EditorControls
-                        selectedLanguage={selectedLanguage}
-                        handleLanguageChange={handleLanguageChange}
-                        handleResetCode={handleResetCode}
-                        startCode={problemData.startCode}
-                    />
-
-                    {/* Code Editor */}
-                    <div className="flex-1 relative">
-                        <Editor
-                            height="100%"
-                            language={getLanguageForMonaco(selectedLanguage)}
-                            theme="vs-dark"
-                            value={code}
-                            onChange={value => setCode(value || '')}
-                            options={{
-                                minimap: { enabled: false },
-                                fontSize: 14,
-                                wordWrap: 'on',
-                                scrollBeyondLastLine: false,
-                                automaticLayout: true,
-                            }}
-                        />
-                    </div>
-
-                    <OutputPanel
-                        activeOutputTab={activeOutputTab}
-                        setActiveOutputTab={setActiveOutputTab}
-                        output={output}
-                        handleRunCode={handleRunCode}
-                        handleSubmitCode={handleSubmitCode}
-                    />
+                <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700 shadow">
+                    <table className="table table-zebra text-sm">
+                        <thead className="text-gray-300 bg-gray-700">
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>Difficulty</th>
+                                <th>Tags</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProblems.map((problem, index) => (
+                                <tr key={problem._id} className="hover">
+                                    <td>{index + 1}</td>
+                                    <td className="text-green-400 hover:underline cursor-pointer" onClick={() => { navigate(`/problem/${problem._id}`) }}>
+                                        {problem.title}
+                                        {solvedProblems.has(problem._id) && (
+                                            <span className="ml-2 text-xs text-green-500">✓</span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <span className={`badge ${problem.difficulty === 'easy' ? 'badge-success' :
+                                            problem.difficulty === 'medium' ? 'badge-warning' : 'badge-error'
+                                            }`}>
+                                            {capitalizeFirstLetter(problem.difficulty)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-wrap gap-1">
+                                            {problem.tags.map(tag => (
+                                                <span key={tag} className="badge badge-outline text-gray-300">{tag}</span>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {solvedProblems.has(problem._id) ? (
+                                            <span className="text-green-500">Solved</span>
+                                        ) : (
+                                            <span className="text-gray-500">Unsolved</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {filteredProblems.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" className="text-center text-gray-500 py-4">
+                                        No problems match the selected filters.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

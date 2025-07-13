@@ -2,51 +2,10 @@ const Problem = require("../models/Problem");
 const User = require("../models/user")
 const { getIdByLanguage, submitBatch, submitToken } = require("../utils/problemUtils")
 
-
-// const createProblem = async (req, res) => {
-//     const { title, description, difficulty, tags, visibleTestCases, hiddenTestCases, startCode, referenceSolution, problemCreator } = req.body
-
-//     try {
-//         for (const { language, completeCode } of referenceSolution) {
-
-//             const languageId = getIdByLanguage(language);
-
-//             const submissions = visibleTestCases.map((testcase) => ({
-//                 source_code: completeCode,
-//                 language_id: languageId,
-//                 stdin: testcase.input,
-//                 expected_output: testcase.output
-//             }))
-//             console.log(submissions)
-//             const submitResult = await submitBatch(submissions)
-//             console.log(submitResult)
-//             const resultToken = submitResult.map((value) => value.token)
-
-//             const testResult = await submitToken(resultToken)
-
-//             for (const test of testResult) {
-//                 if (test.status_id > 3) {
-//                     return res.status(400).send("Error occured: " + test.status_id)
-//                 }
-//             }
-//         }
-
-//         const userProblem = await Problem.create({
-//             ...req.body,
-//             problemCreator: req.user._id
-//         })
-
-//         res.status(200).send("Problem Saved Successfully")
-//     } catch (error) {
-//         res.status(400).send("Error: " + error)
-//     }
-// }
-
 const createProblem = async (req, res) => {
     const { title, description, difficulty, tags, visibleTestCases, hiddenTestCases, startCode, referenceSolution } = req.body;
 
     try {
-        // Validate reference solutions
         if (!referenceSolution || !Array.isArray(referenceSolution)) {
             return res.status(400).send("Reference solutions are required");
         }
