@@ -19,14 +19,14 @@ function AdminDashboard() {
         navigate('/admin/create-problem')
     };
 
-    const handleEditProblem = (id) => {
-        console.log(`Edit problem with ID: ${id}`);
-        // Navigate to edit problem page
+    const handleEditProblem = () => {
+        navigate('/admin/edit-problem')
+
     };
 
     const handleDeleteProblem = (id) => {
-        console.log(`Delete problem with ID: ${id}`);
-        // Show confirmation and delete problem
+        navigate('/admin/delete-problem')
+
     };
 
     return (
@@ -78,7 +78,7 @@ function AdminDashboard() {
                         </div>
 
                         {/* Edit Problem Card */}
-                        <div className="card bg-gray-800 border border-gray-700 hover:border-blue-500 transition-colors">
+                        {/* <div className="card bg-gray-800 border border-gray-700 hover:border-blue-500 transition-colors">
                             <div className="card-body">
                                 <h3 className="card-title text-blue-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@ function AdminDashboard() {
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Delete Problem Card */}
                         <div className="card bg-gray-800 border border-gray-700 hover:border-red-500 transition-colors">
@@ -110,7 +110,7 @@ function AdminDashboard() {
                                 <p className="text-gray-400">Remove problems from the platform</p>
                                 <div className="card-actions justify-end mt-4">
                                     <button
-                                        onClick={() => handleDeleteProblem(1)} // Example ID
+                                        onClick={() => handleDeleteProblem()}
                                         className="btn btn-error btn-sm text-white"
                                     >
                                         Delete Problem

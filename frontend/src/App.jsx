@@ -16,6 +16,7 @@ import ContestDetailPage from "./pages/ContestDetailPage"
 import UserRoute from "./routes/UserRoute"
 import ContestProblemPage from "./pages/ContestProblemPage"
 import ProblemdetailPage from "./pages/ProblemdetailPage"
+import DeleteProblem from "./pages/DeleteProblem"
 
 function App() {
 
@@ -58,6 +59,7 @@ function App() {
           <Route path="admin-panel" element={<AdminDashboard />} />
           <Route path="create-problem" element={<CreateProblemPage />} />
           <Route path="create-contest" element={<CreateContestPage />} />
+          <Route path="delete-problem" element={<DeleteProblem />} />
         </Route>
 
 
