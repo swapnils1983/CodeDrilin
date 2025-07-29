@@ -24,11 +24,21 @@ const problemSchema = new Schema({
         {
             input: {
                 type: String,
-                required: true
+                required: false,
+                default: "",
+                validate: {
+                    validator: (v) => v !== null && v !== undefined,
+                    message: "Input cannot be null or undefined (but empty string is allowed)"
+                }
             },
             output: {
                 type: String,
-                required: true
+                required: false,
+                default: "",
+                validate: {
+                    validator: (v) => v !== null && v !== undefined,
+                    message: "Output cannot be null or undefined (but empty string is allowed)"
+                }
             },
             explanation: {
                 type: String,
@@ -40,13 +50,23 @@ const problemSchema = new Schema({
         {
             input: {
                 type: String,
-                required: true
+                required: false,
+                default: "",
+                validate: {
+                    validator: (v) => v !== null && v !== undefined,
+                    message: "Input cannot be null or undefined (but empty string is allowed)"
+                }
             },
             output: {
                 type: String,
-                required: true
+                required: false,
+                default: "",
+                validate: {
+                    validator: (v) => v !== null && v !== undefined,
+                    message: "Output cannot be null or undefined (but empty string is allowed)"
+                }
             }
-        }
+        },
     ],
     startCode: [
         {

@@ -19,11 +19,6 @@ function AdminDashboard() {
         navigate('/admin/create-problem')
     };
 
-    const handleEditProblem = () => {
-        navigate('/admin/edit-problem')
-
-    };
-
     const handleDeleteProblem = (id) => {
         navigate('/admin/delete-problem')
 
@@ -77,28 +72,6 @@ function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Edit Problem Card */}
-                        {/* <div className="card bg-gray-800 border border-gray-700 hover:border-blue-500 transition-colors">
-                            <div className="card-body">
-                                <h3 className="card-title text-blue-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit Problem
-                                </h3>
-                                <p className="text-gray-400">Modify existing problems and test cases</p>
-                                <div className="card-actions justify-end mt-4">
-                                    <button
-                                        onClick={() => handleEditProblem(1)} // Example ID
-                                        className="btn btn-primary btn-sm text-white"
-                                    >
-                                        Edit Problem
-                                    </button>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Delete Problem Card */}
                         <div className="card bg-gray-800 border border-gray-700 hover:border-red-500 transition-colors">
                             <div className="card-body">
                                 <h3 className="card-title text-red-400">
@@ -158,28 +131,38 @@ function AdminDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {contests.map(contest => (
-                                    <tr key={contest?._id} className="hover:bg-gray-750">
-                                        <td className="font-medium text-white">{contest.title}</td>
-                                        <td>
-                                            <div className="text-sm">{contest.startTime?.toLocaleString()}</div>
-                                            <div className="text-xs text-gray-500">to {contest.endTime?.toString()}</div>
-                                        </td>
-                                        <td>{contest.problems.length}</td>
-                                        <td>{contest.participants.length}</td>
-                                        <td>
-                                            <span className={`badge ${contest.isPublished === 'true' ? 'badge-success' : 'badge-neutral'}`}>
-                                                {contest.isPublished ? 'Published' : 'Draft'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex gap-2">
-                                                <button className="btn btn-xs btn-primary">Edit</button>
-                                                <button className="btn btn-xs btn-error">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {contests.map((contest) => {
+                                    const now = new Date();
+                                    const start = new Date(contest.startTime);
+                                    const end = new Date(contest.endTime);
+                                    const isUpcoming = start > now;
+
+                                    return (
+                                        <tr key={contest._id} className="hover:bg-gray-750">
+                                            <td className="font-medium text-white">{contest.title}</td>
+                                            <td>
+                                                <div className="text-sm">{start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                                                <div className="text-xs text-gray-500">to {end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                                            </td>
+                                            <td>{contest.problems.length}</td>
+                                            <td>{contest.participants.length}</td>
+                                            <td>
+                                                <span className={`badge ${isUpcoming ? 'badge-info' : 'badge-ghost'}`}>
+                                                    {isUpcoming ? 'Upcoming' : 'Past'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex gap-2">
+                                                    {isUpcoming && (
+                                                        <button className="btn btn-xs btn-error">
+                                                            Delete
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

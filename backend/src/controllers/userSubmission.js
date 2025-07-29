@@ -71,9 +71,12 @@ const submitCode = async (req, res) => {
         await submitedresult.save();
 
         const user = await User.findById(req.user._id);
-        if (!user.problemSolved.includes(problemId)) {
-            user.problemSolved.push(problemId);
-            await user.save()
+        if (status === 'accepted') {
+            const user = await User.findById(req.user._id);
+            if (!user.problemSolved.includes(problemId)) {
+                user.problemSolved.push(problemId);
+                await user.save();
+            }
         }
         res.status(201).send(submitedresult);
     } catch (error) {

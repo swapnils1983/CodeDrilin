@@ -9,6 +9,7 @@ export const registerUser = createAsyncThunk(
             const response = await axiosInstance.post('/user/register', userData);
             return response.data.user;
         } catch (error) {
+            console.log(error)
             return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
@@ -22,6 +23,7 @@ export const loginUser = createAsyncThunk(
             const response = await axiosInstance.post('/user/login', credentials);
             return response.data.user;
         } catch (error) {
+            console.log(error)
             return rejectWithValue(error.response?.data?.message || error.message);
         }
     }

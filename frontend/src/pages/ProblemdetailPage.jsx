@@ -55,7 +55,6 @@ const ProblemdetailPage = () => {
 
     const handleRunCode = async () => {
         setOutput({ type: 'running', message: 'Running test cases...', details: [] });
-        setActiveOutputTab('testResults');
 
         try {
             const response = await axiosInstance.post(`submission/run/${id}`, {
@@ -79,7 +78,7 @@ const ProblemdetailPage = () => {
             const allPassed = formattedResults.every(r => r.passed);
             setOutput({
                 type: allPassed ? 'success' : 'error',
-                message: allPassed ? 'All sample tests passed!' : 'Some sample tests failed.',
+                message: allPassed ? 'All test cases passed!' : 'Some test cases failed.',
                 details: formattedResults
             });
         } catch (error) {
@@ -87,15 +86,17 @@ const ProblemdetailPage = () => {
             setOutput({
                 type: 'error',
                 message: error.response?.data?.message || 'Failed to run code',
-                details: error.response?.data?.compile_output ?
-                    [{ name: 'Compilation Error', details: error.response.data.compile_output }] : []
+                details: [{
+                    name: 'Error',
+                    details: error.response?.data?.compile_output || error.message,
+                    passed: false
+                }]
             });
         }
     };
 
     const handleSubmitCode = async () => {
         setOutput({ type: 'running', message: 'Submitting solution...', details: [] });
-        setActiveOutputTab('console');
 
         try {
             const response = await axiosInstance.post(`submission/submit/${id}`, {
@@ -104,24 +105,19 @@ const ProblemdetailPage = () => {
             });
 
             const data = response.data;
-            const testCasesPassed = data.testCasesPassed;
-            const totalTestCases = data.testCasesTotal;
-            const passedAll = testCasesPassed === totalTestCases;
+            const passedAll = data.testCasesPassed === data.testCasesTotal;
 
+            // For submission, we'll show a simplified test result
             setOutput({
                 type: passedAll ? 'success' : 'error',
-                message: passedAll ? 'Accepted' : 'Wrong Answer',
-                details: [
-                    {
-                        name: 'Overall Result',
-                        passed: passedAll,
-                        runtime: `${data.runtime || 0}ms`,
-                        memory: `${data.memory || 0}KB`,
-                        testCasesPassed,
-                        totalTestCases,
-                        status: data.status || 'Unknown'
-                    }
-                ]
+                message: passedAll ? 'Submission Accepted!' : 'Submission Failed',
+                details: [{
+                    name: 'Submission Result',
+                    passed: passedAll,
+                    status: passedAll ? 'Accepted' : 'Wrong Answer',
+                    runtime: `${data.runtime || 0}ms`,
+                    memory: `${data.memory || 0}KB`
+                }]
             });
 
         } catch (error) {
@@ -129,8 +125,11 @@ const ProblemdetailPage = () => {
             setOutput({
                 type: 'error',
                 message: error.response?.data?.message || 'Failed to submit code',
-                details: error.response?.data?.compile_output ?
-                    [{ name: 'Compilation Error', details: error.response.data.compile_output }] : []
+                details: [{
+                    name: 'Error',
+                    details: error.response?.data?.compile_output || error.message,
+                    passed: false
+                }]
             });
         }
     };
@@ -192,7 +191,6 @@ const ProblemdetailPage = () => {
                     </div>
                 </div>
 
-                {/* Right Pane - Code Editor and Output */}
                 <div className="w-1/2 flex flex-col">
                     <EditorControls
                         selectedLanguage={selectedLanguage}
@@ -220,8 +218,6 @@ const ProblemdetailPage = () => {
                     </div>
 
                     <OutputPanel
-                        activeOutputTab={activeOutputTab}
-                        setActiveOutputTab={setActiveOutputTab}
                         output={output}
                         handleRunCode={handleRunCode}
                         handleSubmitCode={handleSubmitCode}

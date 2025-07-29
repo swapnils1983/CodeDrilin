@@ -24,16 +24,14 @@ function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
+
     dispatch(checkAuth());
   }, [])
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-90 z-50">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-green-400 border-dashed rounded-full animate-spin"></div>
-          <p className="mt-4 text-green-300 text-sm font-mono">Loading...</p>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <span className="loading loading-spinner loading-lg text-green-400"></span>
       </div>
     )
   }

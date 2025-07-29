@@ -17,12 +17,12 @@ const submitBatch = async (submissions) => {
 
     const options = {
         method: 'POST',
-        url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+        url: process.env.JUDGE0_API,
         params: {
             base64_encoded: 'false'
         },
         headers: {
-            'x-rapidapi-key': '545fc4406fmsh1d4dc844e83e661p1dd663jsnbb888e17a885',
+            'x-rapidapi-key': 'b7055c95acmsh34946e84e4e6f61p1448adjsn7ebce46cd253',
             'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
             'Content-Type': 'application/json'
         },
@@ -53,14 +53,14 @@ const submitToken = async (resultToken) => {
 
     const options = {
         method: 'GET',
-        url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+        url: process.env.JUDGE0_API,
         params: {
             tokens: resultToken.join(","),
             base64_encoded: 'false',
             fields: '*'
         },
         headers: {
-            'x-rapidapi-key': '545fc4406fmsh1d4dc844e83e661p1dd663jsnbb888e17a885',
+            'x-rapidapi-key': 'b7055c95acmsh34946e84e4e6f61p1448adjsn7ebce46cd253',
             'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
         }
     };

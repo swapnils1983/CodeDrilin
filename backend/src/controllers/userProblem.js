@@ -142,7 +142,7 @@ const getProblemById = async (req, res) => {
 
 const getAllProblem = async (req, res) => {
     try {
-        const allProblems = await Problem.find({}).select('_id title difficulty tags')
+        const allProblems = await Problem.find({ isContestProblem: false }).select('_id title difficulty tags')
         if (allProblems.length == 0) {
             return res.status(404).send("No Problems Exists")
         }

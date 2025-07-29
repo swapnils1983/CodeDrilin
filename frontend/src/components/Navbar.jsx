@@ -12,7 +12,14 @@ function Navbar() {
         <div>
             <div className="navbar bg-gray-800 border-b border-gray-700 px-6">
                 <div className="flex-1">
-                    <h1 className="text-green-400 font-bold font-mono text-xl">{'</>'} CodeDrilin</h1>
+                    <div className="flex items-center">
+                        <h1
+                            className="text-green-400 font-bold font-mono text-xl cursor-pointer hover:text-green-300 transition-colors"
+                            onClick={() => navigate('/')}
+                        >
+                            {'</>'} CodeDrilin
+                        </h1>
+                    </div>
                 </div>
                 <div className="flex-none gap-4">
                     {/* Contests Button */}

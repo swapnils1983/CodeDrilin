@@ -86,7 +86,6 @@ const ContestsPage = () => {
                         <div className="flex items-center gap-3 mb-2">
                             <h2 className="card-title text-xl text-gray-100">{contest.title}</h2>
                             {getStatusBadge(contest)}
-                            {contest.isPublished || <span className="badge badge-warning">Draft</span>}
                         </div>
                         <div className="text-gray-400 text-sm space-y-1">
                             <p><strong>Starts:</strong> {formatDate(contest.startTime)}</p>

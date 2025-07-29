@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../authSlice';
 import { useEffect } from 'react';
 
-// Zod schema for login validation
 const loginSchema = z.object({
     emailId: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
@@ -108,12 +107,6 @@ const Login = () => {
                                 Sign up
                             </Link>
                         </div>
-                    </div>
-
-                    <div className="px-6 py-4 bg-gray-750 text-center border-t border-gray-700">
-                        <p className="text-xs text-gray-500">
-                            Forgot your password? <a href="#" className="link text-gray-400">Reset it here</a>
-                        </p>
                     </div>
                 </div>
             </div>

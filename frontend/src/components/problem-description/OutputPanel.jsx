@@ -1,8 +1,6 @@
 import React from 'react';
 
 const OutputPanel = ({
-    activeOutputTab,
-    setActiveOutputTab,
     output,
     handleRunCode,
     handleSubmitCode
@@ -10,20 +8,14 @@ const OutputPanel = ({
     return (
         <div className="h-1/3 flex flex-col border-t border-gray-700 bg-gray-800">
             <div className="flex px-2 border-b border-gray-700">
-                {['testResults', 'console'].map(tab => (
-                    <button
-                        key={tab}
-                        className={`px-3 py-2 text-xs font-medium ${activeOutputTab === tab ? 'text-green-400 border-b-2 border-green-400' : 'text-gray-400 hover:text-gray-200'}`}
-                        onClick={() => setActiveOutputTab(tab)}
-                    >
-                        {tab === 'testResults' ? 'Test Results' : 'Console'}
-                    </button>
-                ))}
+                <div className="px-3 py-2 text-xs font-medium text-green-400 border-b-2 border-green-400">
+                    Test Results
+                </div>
             </div>
             <div className="flex-1 p-3 overflow-y-auto text-xs">
                 {output.type === 'running' && <p className="text-yellow-400">{output.message}</p>}
 
-                {activeOutputTab === 'testResults' && output.details && output.details.length > 0 && (
+                {output.details && output.details.length > 0 && (
                     <div className="space-y-2">
                         {output.message && (
                             <p className={`font-semibold ${output.type === 'success' ? 'text-green-400' : output.type === 'error' ? 'text-red-400' : 'text-yellow-400'}`}>
@@ -36,42 +28,32 @@ const OutputPanel = ({
                                     <span className={`font-semibold ${result.passed ? 'text-green-400' : 'text-red-400'}`}>
                                         {result.name}
                                     </span>
-                                    <span className="text-gray-400 text-xs">{result.runtime}, {result.memory}</span>
+                                    {result.runtime && (
+                                        <span className="text-gray-400 text-xs">
+                                            {result.runtime}{result.memory ? `, ${result.memory}` : ''}
+                                        </span>
+                                    )}
                                 </div>
                                 {!result.passed && result.input && (
                                     <div className="mt-1 text-gray-300">
                                         <p>Input: <code className="text-yellow-300 whitespace-pre-wrap">{result.input}</code></p>
-                                        <p>Expected: <code className="text-green-300">{result.expectedOutput}</code></p>
-                                        <p>Got: <code className="text-red-300">{result.actualOutput}</code></p>
+                                        {result.expectedOutput && <p>Expected: <code className="text-green-300">{result.expectedOutput}</code></p>}
+                                        {result.actualOutput && <p>Got: <code className="text-red-300">{result.actualOutput}</code></p>}
                                         {result.explanation && <p className="text-xs text-gray-400 mt-1">Explanation: {result.explanation}</p>}
+                                    </div>
+                                )}
+                                {!result.passed && result.details && (
+                                    <div className="mt-1">
+                                        <pre className="text-red-300 whitespace-pre-wrap">{result.details}</pre>
                                     </div>
                                 )}
                             </div>
                         ))}
                     </div>
                 )}
-                {activeOutputTab === 'console' && (
-                    <>
-                        {output.message && output.details && output.details.length > 0 && output.details[0].name === 'Overall Result' && (
-                            <div className="mb-2">
-                                <p className={`font-semibold ${output.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                                    {output.message}
-                                </p>
-                                <p className="text-gray-300 text-xs">
-                                    {output.details[0].testCasesPassed !== undefined &&
-                                        `Test Cases: ${output.details[0].testCasesPassed}/${output.details[0].totalTestCases} passed`}
-                                </p>
-                                <p className="text-gray-300 text-xs">
-                                    Runtime: {output.details[0].runtime}, Memory: {output.details[0].memory}
-                                </p>
-                            </div>
-                        )}
-                        <pre className="whitespace-pre-wrap text-gray-300">
-                            {output.type !== 'running' && !output.details?.some(d => d.name?.includes('Test Case')) && output.message ?
-                                (output.details && output.details[0]?.runtime ? `${output.message}` : output.message)
-                                : (output.type === 'running' ? output.message : "Console output will appear here...")}
-                        </pre>
-                    </>
+
+                {output.type !== 'running' && (!output.details || output.details.length === 0) && (
+                    <p className="text-gray-400">Run or submit your code to see results</p>
                 )}
             </div>
             <div className="p-2 flex justify-end space-x-3 border-t border-gray-700">
