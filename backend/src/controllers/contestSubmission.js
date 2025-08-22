@@ -1,6 +1,6 @@
-const Contest = require("../models/Contest");
-const Problem = require("../models/Problem");
-const Submission = require("../models/Submission");
+const Contest = require("../models/contest");
+const Problem = require("../models/problem");
+const Submission = require("../models/submission");
 const User = require("../models/user");
 const { getIdByLanguage, submitBatch, submitToken } = require("../utils/problemUtils");
 const { emitLeaderboardUpdate } = require("../utils/socketUtils");

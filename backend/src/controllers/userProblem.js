@@ -1,4 +1,4 @@
-const Problem = require("../models/Problem");
+const Problem = require("../models/problem");
 const User = require("../models/user")
 const { getIdByLanguage, submitBatch, submitToken } = require("../utils/problemUtils")
 

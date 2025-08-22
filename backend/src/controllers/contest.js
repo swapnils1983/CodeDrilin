@@ -1,7 +1,8 @@
-const Contest = require('../models/Contest');
-const Problem = require('../models/Problem');
-const Submission = require('../models/Submission');
-const User = require('../models/user');
+const Problem = require("../models/problem");
+const Submission = require("../models/submission");
+const Contest = require("../models/contest");
+const User = require("../models/user");
+
 const { submitBatch, submitToken, getIdByLanguage } = require('../utils/problemUtils');
 
 const createContest = async (req, res) => {
