@@ -18,7 +18,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:5173',
   'https://code-drilin-git-main-swapnils-projects-99b5228d.vercel.app',
-  https://code-drilin-a50ihxw93-swapnils-projects-99b5228d.vercel.app/signup
+  https://code-drilin-a50ihxw93-swapnils-projects-99b5228d.vercel.app
 ];
 const io = initSocket(server, {
     cors: {
