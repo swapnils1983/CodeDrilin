@@ -15,19 +15,20 @@ const { initSocket } = require('./utils/socketUtils');
 
 const server = http.createServer(app);
 
-
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://code-drilin-git-main-swapnils-projects-99b5228d.vercel.app'
+];
 const io = initSocket(server, {
     cors: {
-        origin: ['http://localhost:5173',
-            'https://codedrilin.onrender.com'],
+        origin: allowedOrigins,
         methods: ["GET", "POST"]
     }
 });
 
 
 app.use(cors({
-    origin: ['http://localhost:5173',
-            'https://codedrilin.onrender.com'],
+    origin: allowedOrigins,
     credentials: true
 }));
 
