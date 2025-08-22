@@ -16,7 +16,7 @@ const { initSocket } = require('./utils/socketUtils');
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  'https://code-drilin-8wori8j0s-swapnils-projects-99b5228d.vercel.app',
+  'https://code-drilin.vercel.app',
   'http://localhost:5173',
   
 ];
