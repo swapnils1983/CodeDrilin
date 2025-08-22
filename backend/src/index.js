@@ -18,14 +18,16 @@ const server = http.createServer(app);
 
 const io = initSocket(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: ['http://localhost:5173',
+            'https://codedrilin.onrender.com'],
         methods: ["GET", "POST"]
     }
 });
 
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173',
+            'https://codedrilin.onrender.com'],
     credentials: true
 }));
 
