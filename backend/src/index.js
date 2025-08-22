@@ -22,14 +22,14 @@ const allowedOrigins = [
 ];
 const io = initSocket(server, {
     cors: {
-        origin: '*',
+        origin: allowedOrigins,
         methods: ["GET", "POST"]
     }
 });
 
 
 app.use(cors({
-    origin: '*',
+    origin: allowedOrigins,
     credentials: true
 }));
 
