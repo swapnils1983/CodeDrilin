@@ -12,6 +12,7 @@ const ProblemPage = () => {
     const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const [problems, setProblems] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
     const [selectedTags, setSelectedTags] = useState([]);
     const [showSolved, setShowSolved] = useState(false);
@@ -22,10 +23,14 @@ const ProblemPage = () => {
     useEffect(() => {
         const fetchProblems = async () => {
             try {
+                setLoading(true)
                 const response = await axiosInstance.get('/problem/getAllProblem');
                 setProblems(response.data);
             } catch (error) {
                 console.error("Failed to fetch problems:", error);
+            }
+            finally{
+                setLoading(false)
             }
         };
         fetchProblems();
@@ -51,6 +56,13 @@ const ProblemPage = () => {
         return str.charAt(0).toUpperCase() + str.slice(1);
     };
 
+    if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="loading loading-spinner loading-lg text-green-400"></span>
+      </div>
+    )
+  }
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100">
 
